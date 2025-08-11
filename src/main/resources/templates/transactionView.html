@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div id = "navBar"></div>
+
+<div class="content">
+  <div class="content-top">
+    <select class="dropdown" id="dropdown">
+      <option value="" disabled selected>Sélectionner une relation</option>
+      <option th:each="users : ${users}" th:value="${users.id}" th:text="${users.username}"></option>
+    </select>
+  </div>
+</div>
+</body>
+</html>

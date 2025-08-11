@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Pay My Buddy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+    }
+    .login-container {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 40px;
+      width: 300px;
+      text-align: center;
+      border-radius: 5px;
+    }
+    .logo {
+      background-color: orange;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0069d9;
+    }
+    .error-message {
+      color: red;
+      margin-top: -10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="login-container">
+  <div class="logo">Pay My Buddy</div>
+  <p th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></p>
+
+  <form id="loginForm">
+    <input type="email" name="email" placeholder="Mail" required />
+    <input type="password" name="password" placeholder="Mot de passe" required />
+    <button type="submit">Se connecter</button>
+  </form>
+</div>
+
+<script th:inline="javascript">
+  const loginForm = document.getElementById('loginForm');
+  loginForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const email = this.elements.namedItem("email").value;
+    const password = this.elements.namedItem("password").value;
+
+    const credentials = {
+      email: email,
+      password: password
+    };
+
+    fetch('/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: "include"
+    })
+    .then(async response => {
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+
+        alert(data?.message || 'Échec de la connexion.');
+        throw new Error(data?.message || 'Échec de la connexion.');
+      }
+      window.location.href = '/home';
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  });
+</script>
+</body>
+</html>

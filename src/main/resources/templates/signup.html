@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Pay My Buddy - S'inscrire</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .signup-container {
+      border: 1px solid #ccc;
+      padding: 30px 40px;
+      border-radius: 5px;
+      text-align: center;
+      width: 300px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .logo-btn {
+      background-color: #f7931a;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: default;
+      margin-bottom: 20px;
+    }
+    input[type="text"], input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .submit-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .submit-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+<div class="signup-container">
+  <button class="logo-btn">Pay My Buddy</button>
+
+  <form th:action="@{/signup}" th:object="${signupDTO}" method="post">
+    <input type="text" th:field="*{username}" placeholder="Username" required />
+    <input type="email" th:field="*{email}" placeholder="Mail" required />
+    <input type="password" th:field="*{password}" placeholder="Mot de passe" required />
+    <button type="submit" class="submit-btn">S'inscrire</button>
+  </form>
+</div>
+</body>
+</html>
