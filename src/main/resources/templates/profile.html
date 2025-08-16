@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Profil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Variables de thème */
+    :root {
+      --blue: #1976d2;
+      --blue-active: #1e80ff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --btn: #f59e0b;
+      --btn-hover: #f59e0bcc;
+      --border: #d3d3d3;
+    }
+
+    /* Réglages généraux */
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter,
+      "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      color: var(--text);
+      background: #fff;
+    }
+
+    /* Barre de navigation */
+    .nav {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      font-weight: 700;
+    }
+
+    .menu {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: #111827;
+      font-weight: 500;
+    }
+
+    .menu a.active {
+      color: var(--blue-active);
+    }
+
+    .logout {
+      color: #111827;
+      opacity: .85;
+    }
+
+    /* Conteneur de page */
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      min-height: calc(100vh - 64px);
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 0 0 28px;
+    }
+
+    /* Liste des champs du profil */
+    .list {
+      width: min(720px, 100%);
+      overflow: hidden;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns:180px 1fr;
+      align-items: start;
+      padding: 10px 5px;
+    }
+
+    .username-grid, .email-grid, .pw-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .row-inline, .pw-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px 12px;
+    }
+
+    /* Messages inline pour les champs */
+    .row-inline .alert,
+    .pw-row .alert {
+      margin: 0;
+      padding: 10px 12px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .label {
+      color: #111827;
+      font-weight: 600;
+    }
+
+    /* Bouton chevron (basculer l’édition) */
+    .item .chev {
+      grid-column: 2;
+      grid-row: 2;
+      justify-self: start;
+      align-self: start;
+      margin-top: 5px;
+    }
+
+    .chev {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .chev:focus {
+      outline: 3px solid #1e80ff22;
+    }
+
+    .item:first-child {
+      border-top: none;
+    }
+
+    .value {
+      color: #111827;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    /* Zones “afficher” / “éditer” */
+
+    .edit {
+      display: none;
+    }
+
+    .edit input {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .edit input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px #1e80ff22;
+    }
+
+    /* Actions du formulaire */
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .btn {
+      height: 44px;
+      padding: 0 20px;
+      border: none;
+      border-radius: 10px;
+      background: var(--btn);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: var(--btn-hover);
+    }
+
+    .btn[disabled] {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* Alertes (succès/erreur) */
+    .alert {
+      margin: 5px 0;
+      font-size: 11px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .success {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .error {
+      background: #fef2f2;
+      color: #7f1d1d;
+      border: 1px solid #fecaca;
+    }
+
+    /* Réactivité mobile */
+    @media (max-width: 640px) {
+      .item {
+        grid-template-columns:120px 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+<!-- Navigation principale -->
+<header class="nav" role="banner">
+  <div class="brand">Pay My Buddy</div>
+  <nav class="menu" aria-label="Navigation principale">
+    <a th:href="@{/transfer}">Transférer</a>
+    <a th:href="@{/profile}" class="active" aria-current="page">Profile</a>
+    <a th:href="@{/relations/new}">Ajouter relation</a>
+    <a th:href="@{/logout}" class="logout">Se déconnecter</a>
+  </nav>
+</header>
+
+<main class="page" role="main">
+  <h1>Profil</h1>
+
+  <!-- Messages flash globaux -->
+  <div th:if="${success}" class="alert success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert error" th:text="${error}"></div>
+
+  <!-- Formulaire profil (username + mot de passe ; e-mail affiché en lecture seule) -->
+  <form th:action="@{/profile}" method="post" th:object="${form}" id="profileForm" novalidate>
+    <!-- Méthode PUT (surchargée) + CSRF si activé -->
+    <input type="hidden" name="_method" value="put"/>
+    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}"/>
+
+    <div class="list" role="list">
+      <!-- Ligne : nom d’utilisateur -->
+      <div class="item" role="listitem" id="row-username">
+        <div class="label">Username</div>
+        <div class="value">
+          <span class="show" id="username-show" th:text="${form.username}">@username</span>
+          <div class="edit" id="username-edit">
+            <div class="username-grid">
+              <div class="row-inline">
+                <input type="text"
+                       th:field="*{username}"
+                       autocomplete="nickname"
+                       aria-label="Modifier le nom d'utilisateur"/>
+                <!-- Erreur de validation pour username -->
+                <div class="alert error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="chev" aria-label="Modifier le nom d'utilisateur"
+                data-edit="username">›
+        </button>
+      </div>
+
+      <!-- Ligne : e-mail (lecture seule) -->
+      <div class="item" role="listitem" id="row-email">
+        <div class="label">Email</div>
+        <div class="value">
+          <span class="show" id="email-show" th:text="${form.email}">nom@domain.com</span>
+        </div>
+      </div>
+
+      <!-- Ligne : mot de passe -->
+      <div class="item" role="listitem" id="row-password">
+        <div class="label">Mot de passe</div>
+        <div class="value">
+          <span id="password-show" class="show muted">••••••••</span>
+          <div class="edit" id="password-edit">
+            <div class="pw-grid">
+              <!-- Ancien mot de passe -->
+              <div class="pw-row">
+                <label for="currentPassword" class="sr-only"
+                       style="position:absolute;left:-10000px">Ancien
+                  mot de passe</label>
+                <input id="currentPassword" type="password"
+                       th:field="*{currentPassword}"
+                       autocomplete="current-password"
+                       placeholder="Ancien mot de passe"
+                       aria-label="Ancien mot de passe"/>
+                <div class="alert error"
+                     th:if="${#fields.hasErrors('currentPassword')}"
+                     th:errors="*{currentPassword}"></div>
+              </div>
+
+              <!-- Nouveau mot de passe -->
+              <div class="pw-row">
+                <label for="newPassword" class="sr-only" style="position:absolute;left:-10000px">Nouveau
+                  mot de passe</label>
+                <input id="newPassword" type="password"
+                       th:field="*{newPassword}"
+                       autocomplete="new-password"
+                       placeholder="Nouveau mot de passe"
+                       aria-label="Nouveau mot de passe"/>
+                <div class="alert error"
+                     th:if="${#fields.hasErrors('newPassword')}"
+                     th:errors="*{newPassword}"></div>
+              </div>
+
+              <!-- Confirmation du mot de passe -->
+              <div class="pw-row">
+                <label for="confirmPassword" class="sr-only"
+                       style="position:absolute;left:-10000px">Confirmer
+                  le mot de passe</label>
+                <input id="confirmPassword" type="password"
+                       th:field="*{confirmPassword}"
+                       autocomplete="new-password"
+                       placeholder="Confirmer le mot de passe"
+                       aria-label="Confirmer le mot de passe"/>
+                <div class="alert error"
+                     th:if="${#fields.hasErrors('confirmPassword')}"
+                     th:errors="*{confirmPassword}"></div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="chev" aria-label="Modifier le mot de passe"
+                  data-edit="password">›
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn" type="submit" id="submitBtn" disabled>Modifier</button>
+      </div>
+    </div>
+  </form>
+
+  <script>
+    /* Bascule afficher/éditer pour une section donnée (username/password) */
+    function toggleEdit(key) {
+      const show = document.getElementById(key + '-show');
+      const edit = document.getElementById(key + '-edit');
+      if (!show || !edit) {
+        return;
+      }
+      const editing = edit.style.display === 'block';
+      if (editing) {
+        edit.style.display = 'none';
+        show.style.display = '';
+      } else {
+        edit.style.display = 'block';
+        show.style.display = 'none';
+        const input = edit.querySelector('input');
+        if (input) {
+          input.focus();
+          input.select?.();
+        }
+      }
+      // Débloque le bouton “Modifier” dès qu’un champ est édité
+      document.getElementById('submitBtn').disabled = false;
+    }
+
+    /* Gestion du clic sur les chevrons */
+    document.addEventListener('click', (e) => {
+      const key = e.target?.getAttribute?.('data-edit');
+      if (key) {
+        toggleEdit(key);
+      }
+    });
+
+    /* À l’ouverture : si des erreurs existent, ouvrir automatiquement la section concernée */
+    window.addEventListener('DOMContentLoaded', () => {
+      ['username', 'email', 'password'].forEach(k => {
+        const err = document.querySelector('#row-' + k + ' .error');
+        if (err) {
+          toggleEdit(k);
+        }
+      })
+    })
+  </script>
+</main>
+</body>
+</html>

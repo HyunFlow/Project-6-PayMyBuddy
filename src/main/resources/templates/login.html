@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Pay My Buddy</title>
+  <title>Connexion</title>
   <style>
+    /* Styles de base */
     body {
       font-family: Arial, sans-serif;
       display: flex;
@@ -12,6 +13,7 @@
       height: 100vh;
       background-color: #f9f9f9;
     }
+    /* Conteneur de connexion */
     .login-container {
       background: #fff;
       border: 1px solid #ccc;
@@ -20,6 +22,7 @@
       text-align: center;
       border-radius: 5px;
     }
+    /* Logo/brand */
     .logo {
       background-color: orange;
       color: white;
@@ -28,14 +31,16 @@
       margin-bottom: 20px;
       font-weight: bold;
     }
+    /* Champs de saisie */
     input[type="email"], input[type="password"] {
       width: 100%;
-      padding: 10px;
+      padding: 10px 0px 10px 0px;
       margin-bottom: 15px;
       border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 14px;
     }
+    /* Bouton de soumission */
     button {
       width: 100%;
       padding: 10px;
@@ -49,6 +54,7 @@
     button:hover {
       background-color: #0069d9;
     }
+    /* Message d’erreur (flash) */
     .error-message {
       color: red;
       margin-top: -10px;
@@ -59,8 +65,11 @@
 <body>
 <div class="login-container">
   <div class="logo">Pay My Buddy</div>
+
+  <!-- Message d’erreur côté serveur (si présent) -->
   <p th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></p>
 
+  <!-- Formulaire de connexion -->
   <form id="loginForm">
     <input type="email" name="email" placeholder="Mail" required />
     <input type="password" name="password" placeholder="Mot de passe" required />
@@ -69,10 +78,14 @@
 </div>
 
 <script th:inline="javascript">
+  // Soumission AJAX du formulaire de connexion
+  // NOTE: si la protection CSRF est activée côté serveur, ajouter l’en-tête X-CSRF-TOKEN.
   const loginForm = document.getElementById('loginForm');
+
   loginForm.addEventListener('submit', function(event) {
     event.preventDefault();
 
+    // Récupération des identifiants
     const email = this.elements.namedItem("email").value;
     const password = this.elements.namedItem("password").value;
 
@@ -81,25 +94,29 @@
       password: password
     };
 
+    // Requête d’authentification
     fetch('/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ email, password }),
-      credentials: "include"
+      credentials: "include" // inclut les cookies de session
     })
     .then(async response => {
       const data = await response.json().catch(() => null);
 
+      // Gestion des erreurs HTTP
       if (!response.ok) {
-
         alert(data?.message || 'Échec de la connexion.');
         throw new Error(data?.message || 'Échec de la connexion.');
       }
-      window.location.href = '/home';
+
+      // Redirection en cas de succès
+      window.location.href = '/transfer';
     })
     .catch(error => {
+      // Journalisation des erreurs réseau/JS
       console.error('Error:', error);
     });
   });

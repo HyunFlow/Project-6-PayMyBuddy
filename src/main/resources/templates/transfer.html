@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Transférer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --blue:#1976d2; --blue-active:#1e80ff;
+      --text:#1f2937; --muted:#6b7280;
+      --btn:#f59e0b; --btn-hover:#f59e0bcc;
+      --border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol",sans-serif;
+      color:var(--text); background:#fff;
+    }
+
+    /* Barre de navigation */
+    .nav{ height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; border-bottom:1px solid var(--border); background:#fff; position:sticky; top:0; z-index:10;}
+    .brand{ font-weight:700; }
+    .menu{ display:flex; gap:28px; align-items:center; }
+    .menu a{ text-decoration:none; color:#111827; font-weight:500; }
+    .menu a.active{ color:var(--blue-active); }
+    .logout{ color:#111827; opacity:.85; }
+
+    /* Page */
+    .page{ max-width:980px; margin:0 auto; padding:40px 20px; min-height:calc(100vh - 64px); }
+    .controls{ display:grid; grid-template-columns: 1fr 1.2fr max(180px,18ch) 120px; gap:16px; align-items:end; margin:36px 0 24px; }
+    label{ font-weight:600; font-size:14px; display:block; margin-bottom:8px; }
+    select, input[type="text"], .amount{ height:44px; width:100%; border:1px solid var(--border); border-radius:10px; padding:0 14px; font-size:16px; outline:none; }
+    select:focus, input[type="text"]:focus, .amount input:focus{ border-color:var(--blue); box-shadow:0 0 0 3px #1e80ff22; }
+
+    /* Contrôles d'incrément du montant */
+    .amount{ display:flex; align-items:center; padding:0; overflow:hidden; }
+    .amount input{ flex:1; height:44px; border:none; padding:0 12px; font-size:16px; min-width:0; }
+    .stepper{ display:flex; flex-direction:column; border-left:1px solid var(--border); }
+    .stepper button{ width:36px; height:22px; border:0; background:#fff; cursor:pointer; font-size:14px; line-height:22px; }
+    .stepper button:active{ background:#f9fafb; }
+    .amount .prefix{ padding:0 10px; border-right:1px solid var(--border); }
+
+    .btn{ height:44px; padding:0 18px; border:none; border-radius:10px; background:var(--btn); color:#fff; font-size:11px; cursor:pointer; }
+    .btn:hover{ background:var(--btn-hover); }
+
+    /* Tableau */
+    .card{ border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+    table{ width:100%; border-collapse:collapse; }
+    thead{ background:#fafafa; }
+    th, td{ padding:16px 18px; text-align:left; border-bottom:1px solid var(--border); }
+    th{ font-size:14px; color:#374151; }
+    .section-title{ font-size:18px; font-weight:700; margin:28px 0 12px; }
+    .muted{ color:var(--muted); font-size:14px; }
+
+    /* Messages flash */
+    .alert{ margin-top:10px; font-size:12px; padding:10px 12px; border-radius:10px; display:inline-block; }
+    .alert.success{ background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    .alert.error{ background:#fef2f2; color:#7f1d1d; border:1px solid #fecaca; }
+
+    @media (max-width:860px){
+      .controls{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<header class="nav" role="banner">
+  <div class="brand">Pay My Buddy</div>
+  <nav class="menu" aria-label="Navigation principale">
+    <a th:href="@{/transfer}" class="active" aria-current="page">Transférer</a>
+    <a th:href="@{/profile}">Profil</a>
+    <a th:href="@{/relations/new}">Ajouter relation</a>
+    <a th:href="@{/logout}" class="logout">Se déconnecter</a>
+  </nav>
+</header>
+
+<main class="page" role="main">
+  <h1 style="font-size:22px; margin:0;">Transférer de l’argent</h1>
+
+  <!-- Messages flash -->
+  <div th:if="${success}" class="alert success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert error" th:text="${error}"></div>
+
+
+  <form th:action="@{|/accounts/${accountId}/transfer|}" method="post" th:object="${transferForm}" novalidate>
+    <input type="hidden"
+           th:if="${_csrf != null}"
+           th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}" />
+
+    <!-- Identifiant du compte émetteur + devise -->
+    <input type="hidden" th:field="*{senderAccountId}" th:value="${accountId}" />
+    <input type="hidden" name="currency" value="EUR"/>
+
+    <div class="controls">
+      <!-- 1) Sélection de la relation -->
+      <div>
+        <label for="relation">Sélectionner une relation</label>
+        <select id="relation" th:field="*{receiverAccountId}" required>
+          <option value="" disabled selected>Choisir…</option>
+          <!-- RelationOptionDTO: id, username (ou displayName) -->
+          <option th:each="r : ${relations}"
+                  th:value="${r.accountId}"
+                  th:text="${r.email}">
+          </option>
+        </select>
+      </div>
+
+      <!-- 2) Description -->
+      <div>
+        <label for="description">Description</label>
+        <input id="description" type="text" th:field="*{description}" placeholder="Ex. Restaurant" maxlength="255" />
+      </div>
+
+      <!-- 3) Montant + incrémentation -->
+      <div>
+        <label for="amount">Montant</label>
+        <div class="amount">
+          <div class="prefix">€</div>
+          <input id="amount" type="number" th:field="*{amount}"
+                 inputmode="decimal" step="1" min="0" value="0.00" />
+          <div class="stepper" aria-hidden="true">
+            <button type="button" id="btnUp" title="Augmenter">▲</button>
+            <button type="button" id="btnDown" title="Diminuer">▼</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) Bouton de paiement -->
+      <div>
+        <button type="submit" class="btn" style="width:100%;">Payer</button>
+      </div>
+    </div>
+
+    <!-- Erreurs de champ -->
+    <div th:if="${#fields.hasErrors('receiverAccountId')}" class="alert error" th:errors="*{receiverAccountId}"></div>
+    <div th:if="${#fields.hasErrors('amount')}" class="alert error" th:errors="*{amount}"></div>
+  </form>
+
+  <!-- Historique des transactions -->
+  <h2 class="section-title">Mes Transactions</h2>
+  <div class="card" role="region" aria-label="Mes transactions">
+    <table>
+      <thead>
+      <tr>
+        <th>Relations</th>
+        <th>Description</th>
+        <th style="width:140px;">Montant</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:if="${#lists.isEmpty(transactions)}">
+        <td colspan="3" class="muted">Aucune transaction pour le moment.</td>
+      </tr>
+      <!-- TransactionResponse: relationUsername, description, amount (BigDecimal), currency(optionnel), transactionTime(optionnel) -->
+      <tr th:each="t : ${transactions}">
+        <td th:text="${t.relationEmail}">Nom</td>
+        <td th:text="${t.description}">Description</td>
+        <td>
+          <span th:text="${#numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}"></span>
+          <span th:text="${t.currency != null ? t.currency : '€'}">€</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+  /* Incrémentation du montant via les boutons */
+  const amt = document.getElementById('amount');
+  const up = document.getElementById('btnUp');
+  const down = document.getElementById('btnDown');
+
+  function toNum(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+  up?.addEventListener('click', () => {
+    amt.value = (toNum(amt.value) + (parseFloat(amt.step) || 1)).toFixed(0);
+  });
+
+  down?.addEventListener('click', () => {
+    const step = parseFloat(amt.step) || 1;
+    const next = toNum(amt.value) - step;
+    amt.value = next < 0 ? 0 : next.toFixed(0);
+  });
+</script>
+
+</body>
+</html>

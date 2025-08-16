@@ -1,8 +1,9 @@
 package com.openclassrooms.pay_my_buddy.config;
 
-import com.openclassrooms.pay_my_buddy.jwt.JwtFilter;
-import com.openclassrooms.pay_my_buddy.jwt.JwtUtil;
-import com.openclassrooms.pay_my_buddy.jwt.LoginFilter;
+import com.openclassrooms.pay_my_buddy.security.jwt.JwtFilter;
+import com.openclassrooms.pay_my_buddy.security.jwt.JwtUtil;
+import com.openclassrooms.pay_my_buddy.security.jwt.LoginFilter;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +36,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http, Validator validator) throws Exception {
     http
         .csrf((auth) -> auth.disable())
         .formLogin((auth) -> auth.disable())
@@ -61,11 +62,12 @@ public class SecurityConfig {
 
     http
         .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
+        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, validator), UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests((auth) -> auth
             .requestMatchers("/","/login","/signup", "/css/**", "/js/**", "/images/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
             .requestMatchers("/admin").hasAuthority("ADMIN")
+            .requestMatchers("/relations/new", "/relations", "/transfer", "/accounts/*/transfer", "/profile").hasAnyAuthority("ADMIN", "USER")
             .anyRequest().authenticated()
         );
 

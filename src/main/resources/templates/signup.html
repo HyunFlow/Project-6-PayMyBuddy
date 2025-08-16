@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Pay My Buddy - S'inscrire</title>
+  <title>S'inscrire</title>
   <style>
+    /* Mise en page de base */
     body {
       font-family: Arial, sans-serif;
       background-color: #ffffff;
@@ -12,6 +13,7 @@
       align-items: center;
       height: 100vh;
     }
+    /* Carte d'inscription */
     .signup-container {
       border: 1px solid #ccc;
       padding: 30px 40px;
@@ -20,24 +22,28 @@
       width: 300px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+    /* En-tête / logo */
     .logo-btn {
       background-color: #f7931a;
+      width: 100%;
       color: white;
-      padding: 8px 16px;
+      padding: 10px 20px;
       border: none;
       border-radius: 6px;
       font-size: 16px;
       cursor: default;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
+    /* Champs de saisie */
     input[type="text"], input[type="email"], input[type="password"] {
       width: 100%;
-      padding: 10px;
+      padding: 10px 0 10px 0;
       margin: 6px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 14px;
     }
+    /* Bouton de soumission */
     .submit-btn {
       background-color: #007bff;
       color: white;
@@ -52,17 +58,65 @@
     .submit-btn:hover {
       background-color: #0056b3;
     }
+    /* Messages d'erreur */
+    .error-message {
+      color: #c1121f;
+      font-size: 12px;
+      margin: 2px 0 6px;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
 <div class="signup-container">
-  <button class="logo-btn">Pay My Buddy</button>
+  <!-- En-tête -->
+  <button class="logo-btn" aria-hidden="true">Pay My Buddy</button>
 
-  <form th:action="@{/signup}" th:object="${signupDTO}" method="post">
-    <input type="text" th:field="*{username}" placeholder="Username" required />
-    <input type="email" th:field="*{email}" placeholder="Mail" required />
-    <input type="password" th:field="*{password}" placeholder="Mot de passe" required />
+  <!-- Formulaire d'inscription -->
+  <form th:action="@{/signup}" th:object="${signupRequest}" method="post" novalidate>
+    <!-- Jeton CSRF (rendu uniquement si activé côté serveur) -->
+    <input type="hidden"
+           th:if="${_csrf != null}"
+           th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}" />
+
+    <!-- Nom d'utilisateur -->
+    <input type="text"
+           th:field="*{username}"
+           placeholder="Nom d'utilisateur"
+           autocomplete="username"
+           required
+           autofocus />
+    <div class="error-message"
+         th:if="${#fields.hasErrors('username')}"
+         th:errors="*{username}"></div>
+
+    <!-- E-mail -->
+    <input type="email"
+           th:field="*{email}"
+           placeholder="E-mail"
+           autocomplete="email"
+           required />
+    <div class="error-message"
+         th:if="${#fields.hasErrors('email')}"
+         th:errors="*{email}"></div>
+
+    <!-- Mot de passe -->
+    <input type="password"
+           th:field="*{password}"
+           placeholder="Mot de passe"
+           autocomplete="new-password"
+           minlength="8"
+           required />
+    <div class="error-message"
+         th:if="${#fields.hasErrors('password')}"
+         th:errors="*{password}"></div>
+
+    <!-- Soumettre -->
     <button type="submit" class="submit-btn">S'inscrire</button>
+
+    <!-- Message d'erreur global (si nécessaire) -->
+    <div class="error-message" th:if="${#fields.hasGlobalErrors()}" th:errors="*{__all__}"></div>
   </form>
 </div>
 </body>
