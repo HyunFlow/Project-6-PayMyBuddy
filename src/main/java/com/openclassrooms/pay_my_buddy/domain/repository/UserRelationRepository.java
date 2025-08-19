@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRelationRepository extends JpaRepository<UserRelation, Integer> {
   List<UserRelation> findAllByDefiningUserId(Integer id);
-  List<UserRelation> findByDefiningUser(User user);
 
   List<UserRelation> findByRelatedUserId(Integer id);
   List<UserRelation> findByRelatedUser(User user);

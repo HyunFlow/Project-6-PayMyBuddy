@@ -1,6 +1,6 @@
 package com.openclassrooms.pay_my_buddy.web.controller;
 
-import com.openclassrooms.pay_my_buddy.application.service.ProfileService;
+import com.openclassrooms.pay_my_buddy.application.service.profile.ProfileService;
 import com.openclassrooms.pay_my_buddy.domain.model.User;
 import com.openclassrooms.pay_my_buddy.web.dto.user.ProfileUpdateRequest;
 import jakarta.validation.Valid;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
-public class UserProfileController {
+public class ProfileController {
 
     private final ProfileService profileService;
 

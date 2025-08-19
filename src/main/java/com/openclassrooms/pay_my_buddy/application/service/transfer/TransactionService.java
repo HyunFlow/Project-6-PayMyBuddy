@@ -1,6 +1,5 @@
-package com.openclassrooms.pay_my_buddy.application.service;
+package com.openclassrooms.pay_my_buddy.application.service.transfer;
 
-import com.openclassrooms.pay_my_buddy.application.service.transfer.TransferResult;
 import com.openclassrooms.pay_my_buddy.domain.model.Account;
 import com.openclassrooms.pay_my_buddy.domain.model.Transaction;
 import com.openclassrooms.pay_my_buddy.domain.model.enums.AccountStatus;

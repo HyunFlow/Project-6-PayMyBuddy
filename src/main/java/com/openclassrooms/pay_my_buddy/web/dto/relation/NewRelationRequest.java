@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class NewRelationRequest {
-    @Email
+    @Email(message = "Adresse e-mail invalide")
     @NotBlank
     private String email;
 }

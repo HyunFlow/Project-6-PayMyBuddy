@@ -1,9 +1,8 @@
 package com.openclassrooms.pay_my_buddy.web.controller;
 
-import com.openclassrooms.pay_my_buddy.application.service.AccountService;
-import com.openclassrooms.pay_my_buddy.application.service.RelationService;
-import com.openclassrooms.pay_my_buddy.application.service.TransactionService;
-import com.openclassrooms.pay_my_buddy.application.service.transfer.TransferResult;
+import com.openclassrooms.pay_my_buddy.application.service.account.AccountService;
+import com.openclassrooms.pay_my_buddy.application.service.relation.RelationService;
+import com.openclassrooms.pay_my_buddy.application.service.transfer.TransactionService;
 import com.openclassrooms.pay_my_buddy.domain.repository.UserRepository;
 import com.openclassrooms.pay_my_buddy.web.dto.transaction.TransactionRequest;
 import jakarta.validation.Valid;
@@ -21,7 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
-public class TransactionController {
+public class TransferController {
 
     private final AccountService accountService;
     private final RelationService  relationService;
@@ -79,9 +78,8 @@ public class TransactionController {
         }
 
         try {
-            TransferResult result = transactionService.transferMoney(form);
+            transactionService.transferMoney(form);
             ra.addFlashAttribute("success", "Transfer effectué");
-            ra.addFlashAttribute("transferResult", result);
         } catch (IllegalArgumentException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
             ra.addFlashAttribute("transferForm", form);

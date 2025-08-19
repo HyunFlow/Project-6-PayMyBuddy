@@ -1,7 +1,7 @@
 package com.openclassrooms.pay_my_buddy.web.controller;
 
 import com.openclassrooms.pay_my_buddy.web.dto.auth.SignupRequest;
-import com.openclassrooms.pay_my_buddy.application.service.AuthService;
+import com.openclassrooms.pay_my_buddy.application.service.authentication.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

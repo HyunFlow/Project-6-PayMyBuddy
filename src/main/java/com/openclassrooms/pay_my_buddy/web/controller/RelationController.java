@@ -1,6 +1,6 @@
 package com.openclassrooms.pay_my_buddy.web.controller;
 
-import com.openclassrooms.pay_my_buddy.application.service.RelationService;
+import com.openclassrooms.pay_my_buddy.application.service.relation.RelationService;
 import com.openclassrooms.pay_my_buddy.web.dto.relation.NewRelationRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/relations")
-public class UserRelationController {
+public class RelationController {
 
     private final RelationService relationService;
 

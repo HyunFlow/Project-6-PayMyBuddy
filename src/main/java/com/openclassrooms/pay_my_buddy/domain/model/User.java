@@ -11,6 +11,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

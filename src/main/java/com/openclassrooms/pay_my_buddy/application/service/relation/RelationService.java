@@ -1,4 +1,4 @@
-package com.openclassrooms.pay_my_buddy.application.service;
+package com.openclassrooms.pay_my_buddy.application.service.relation;
 
 import com.openclassrooms.pay_my_buddy.domain.model.Account;
 import com.openclassrooms.pay_my_buddy.domain.model.User;
@@ -21,7 +21,6 @@ public class RelationService {
     private final UserRepository userRepository;
     private final UserRelationRepository relationRepository;
     private final AccountRepository accountRepository;
-    private final UserRelationRepository userRelationRepository;
 
     @Transactional
     public void addBeneficiary(String currentUserEmail, String targetEmail) {

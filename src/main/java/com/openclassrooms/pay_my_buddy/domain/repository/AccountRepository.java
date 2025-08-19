@@ -30,4 +30,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
   Optional<Account> findTopByUserIdOrderByAccountIdAsc(Integer userId);
   Optional<Account> findByUserIdAndAccountType(Integer userId, AccountType accountType);
+
+  @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND a.accountStatus = 'ACTIVE'")
+  List<Account> findActiveByUserId(@Param("userId") Integer userId);
 }
