@@ -5,8 +5,13 @@ import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
+/**
+ * DTO de requête pour un virement interne.
+ * Champs requis côté service: senderAccountId, receiverAccountId, amount.
+ * La devise est optionnelle (par défaut EUR si absente).
+ */
 public class TransactionRequest {
- private Integer sendUserId;
+  private Integer sendUserId;
     private Integer senderAccountId;
     private Integer receiverUserId;
     private Integer receiverAccountId;

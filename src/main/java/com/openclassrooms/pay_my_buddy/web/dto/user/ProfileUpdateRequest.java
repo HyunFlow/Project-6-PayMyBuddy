@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO de mise à jour du profil.
+ * - username/email: champs de base
+ * - current/new/confirmPassword: requis seulement en cas de changement de mot de passe
+ */
 public class ProfileUpdateRequest {
 
     String username;

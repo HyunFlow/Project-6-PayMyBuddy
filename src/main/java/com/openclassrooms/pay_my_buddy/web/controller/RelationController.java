@@ -20,11 +20,24 @@ public class RelationController {
 
     private final RelationService relationService;
 
+    /**
+     * Affiche le formulaire d’ajout d’une nouvelle relation bénéficiaire.
+     * @param dto modèle de formulaire
+     * @return vue du formulaire
+     */
     @GetMapping("/new")
     public String showForm(@ModelAttribute("form") NewRelationRequest dto) {
         return "relations/new";
     }
 
+    /**
+     * Ajoute une relation bénéficiaire pour l’utilisateur courant.
+     * @param dto requête contenant l’email cible
+     * @param bindingResult erreurs de validation
+     * @param auth authentification courante
+     * @param ra attributs de redirection (messages flash)
+     * @return redirection vers le formulaire
+     */
     @PostMapping
     public String add(@Valid @ModelAttribute("form") NewRelationRequest dto,
         BindingResult bindingResult,

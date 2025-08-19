@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Un service d'application pour accéder et valider les {@link Account}s.
+ * Les services d'application pour accéder et valider les {@link Account}s.
  * */
 @Service
 @RequiredArgsConstructor
@@ -16,27 +16,23 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     /**
-     * Vérifier qu'un compte interne d'application appartient à un utilisateur spécifique.
+     * Vérifie qu’un compte interne appartient à un utilisateur donné.
      *
-     * @param accountId : identifiant du compte interne
-     * @param userId
-     * @return boolean : le résultat de possession
+     * @param accountId identifiant du compte interne
+     * @param userId identifiant utilisateur
+     * @return true si le compte appartient à l’utilisateur
      */
     public boolean isOwnedByUser(Integer accountId, Integer userId) {
         return accountRepository.existsByAccountIdAndUserId(accountId, userId);
     }
 
-    /**
-     * Récupérer un compte interne correspond par un @param accountId.
-     */
+    /** Récupère un compte interne par son identifiant. */
     public Account getAccount(Integer accountId) {
         return accountRepository.findById(accountId)
             .orElseThrow(() -> new IllegalArgumentException("Compte introuvable : " + accountId));
     }
 
-    /**
-     * Récupérer un identifiant du compte interne (CHECKING) par défaut qui correspond à @param userId.
-     */
+    /** Récupère l’identifiant du compte interne par défaut (CHECKING) d’un utilisateur. */
     public Integer getDefaultAccountId(Integer userId) {
         return accountRepository
             .findByUserIdAndAccountType(userId, AccountType.CHECKING)

@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Builder
+/**
+ * DTO de réponse pour l’historique des transactions.
+ * Contient l’email du contact, la description, le montant, la devise et la date.
+ */
 public class TransactionResponse {
     private String relationEmail;
     private String description;

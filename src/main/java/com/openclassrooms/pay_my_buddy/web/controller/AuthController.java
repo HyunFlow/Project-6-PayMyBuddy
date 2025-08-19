@@ -19,11 +19,21 @@ public class AuthController {
 
   private final AuthService authService;
 
+  /**
+   * Page par défaut: redirige vers la page de connexion.
+   * @return redirection /login
+   */
   @GetMapping("/")
   public String defaultPage() {
     return "redirect:/login";
   }
 
+  /**
+   * Affiche la page d’inscription.
+   * @param model modèle vue
+   * @param error indicateur d’erreur de duplication email
+   * @return vue signup
+   */
   @GetMapping("/signup")
   public String signupPage(Model model,
       @RequestParam(value = "error", required = false) String error) {
@@ -35,6 +45,12 @@ public class AuthController {
     return "signup";
   }
 
+  /**
+   * Traite l’inscription utilisateur.
+   * @param signupRequest données d’inscription
+   * @param redirectAttributes attributs de redirection
+   * @return redirection vers /login en cas de succès, sinon /signup?error
+   */
   @PostMapping("/signup")
   public String signup(SignupRequest signupRequest, RedirectAttributes redirectAttributes) {
     boolean success = authService.signup(signupRequest);
@@ -46,6 +62,9 @@ public class AuthController {
     }
   }
 
+  /**
+   * Affiche la page de connexion, ou redirige vers /transfer si déjà connecté.
+   */
   @GetMapping("/login")
   public String loginPage(Authentication authentication) {
     if (authentication != null && authentication.isAuthenticated()) {
@@ -54,6 +73,11 @@ public class AuthController {
     return "login";
   }
 
+  /**
+   * Déconnecte l’utilisateur en vidant les cookies d’authentification.
+   * @param response réponse HTTP pour définir les cookies expirés
+   * @return redirection /login
+   */
   @PostMapping("/logout")
   public String logout(HttpServletResponse response) {
     Cookie accessTokenCookie = new Cookie("accessToken", "");

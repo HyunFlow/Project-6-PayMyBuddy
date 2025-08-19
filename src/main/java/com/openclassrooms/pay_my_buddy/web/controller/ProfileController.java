@@ -20,6 +20,12 @@ public class ProfileController {
 
     private final ProfileService profileService;
 
+    /**
+     * Affiche la page de profil de l’utilisateur courant.
+     * @param model modèle vue
+     * @param auth authentification courante
+     * @return vue profile
+     */
     @GetMapping("/profile")
     public String showUserProfile(Model model, Authentication auth) {
         User me = profileService.getCurrentUser(auth);
@@ -27,6 +33,14 @@ public class ProfileController {
         return "profile";
     }
 
+    /**
+     * Met à jour le profil utilisateur et gère les erreurs de validation.
+     * @param req requête de mise à jour
+     * @param br résultats de validation
+     * @param auth authentification courante
+     * @param ra attributs de redirection (messages flash)
+     * @return vue ou redirection vers /profile
+     */
     @PostMapping("/profile")
     public String update(@Valid @ModelAttribute("form") ProfileUpdateRequest req, BindingResult br,
         Authentication auth, RedirectAttributes ra) {

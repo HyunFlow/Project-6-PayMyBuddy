@@ -17,6 +17,14 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Inte
 
   boolean existsByDefiningUserIdAndRelatedUserId(Integer definingUserId, Integer relatedUserId);
 
+  /**
+   * Sélectionne l’identifiant d’un compte interne receveur pour l’utilisateur cible.
+   * Règles d’ordre: privilégie un compte CHECKING actif, puis le plus récent disponible.
+   * Méthode native car l’ordonnancement dépend du type et de la date de création.
+   *
+   * @param userId identifiant de l’utilisateur cible
+   * @return identifiant du compte receveur choisi, ou null si aucun
+   */
   @Query(value = """
       SELECT a.account_id
       FROM `accounts` a

@@ -27,6 +27,11 @@ public class TransferController {
     private final TransactionService transactionService;
     private final UserRepository userRepository;
 
+    /**
+     * Redirige l’utilisateur vers la page de virement de son compte par défaut.
+     * @param auth authentification courante
+     * @return redirection vers /accounts/{accountId}/transfer
+     */
     @GetMapping("/transfer")
     public String goToDefaultTransfer(Authentication auth) {
         Integer userId = currentUserId(auth);
@@ -34,6 +39,17 @@ public class TransferController {
         return "redirect:/accounts/" + accountId + "/transfer";
     }
 
+    /**
+     * Affiche la page de virement pour un compte spécifique.
+     * - Vérifie la propriété du compte
+     * - Prépare le formulaire, les relations disponibles et l’historique récent
+     *
+     * @param accountId identifiant du compte émetteur
+     * @param model modèle vue
+     * @param auth authentification courante
+     * @return nom de la vue "transfer"
+     * @throws AccessDeniedException si le compte n’appartient pas à l’utilisateur
+     */
     @GetMapping("/accounts/{accountId}/transfer")
     public String showTransactionPage(@PathVariable Integer accountId, Model model, Authentication auth) {
         Integer userId = currentUserId(auth);
@@ -54,6 +70,19 @@ public class TransferController {
         return "transfer";
     }
 
+    /**
+     * Traite un virement depuis le compte indiqué.
+     * - Valide la correspondance du compte dans le formulaire
+     * - Appelle la logique métier de virement
+     * - Gère les erreurs de validation métier sous forme de messages flash
+     *
+     * @param accountId identifiant du compte émetteur dans l’URL
+     * @param form données du virement
+     * @param br résultats de validation
+     * @param auth authentification courante
+     * @param ra attributs de redirection (messages flash)
+     * @return redirection vers la page de virement
+     */
     @PostMapping("/accounts/{accountId}/transfer")
     public String transfer(@PathVariable Integer accountId,
         @Valid @ModelAttribute("transferForm") TransactionRequest form,
@@ -88,6 +117,12 @@ public class TransferController {
         return "redirect:/accounts/" + accountId + "/transfer";
     }
 
+    /**
+     * Récupère l’identifiant utilisateur à partir de l’email d’authentification.
+     * @param auth authentification courante
+     * @return identifiant utilisateur
+     * @throws IllegalArgumentException si l’utilisateur est introuvable
+     */
     private Integer currentUserId(Authentication auth) {
         return userRepository.findByEmail(auth.getName())
             .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"))

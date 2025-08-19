@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Gère l’authentification et l’inscription des utilisateurs.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -18,6 +21,16 @@ public class AuthService {
   private final AccountRepository accountRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+  /**
+   * Traite l’inscription d’un nouvel utilisateur.
+   * - Vérifie l’unicité de l’email
+   * - Chiffre le mot de passe avant sauvegarde
+   * - Crée un compte interne par défaut (CHECKING)
+   *
+   * @param request nom d’utilisateur, email et mot de passe en clair
+   * @return true en cas de succès
+   * @throws IllegalArgumentException si l’email existe déjà
+   */
   public boolean signup(SignupRequest request) {
     if (userRepository.existsByEmail(request.getEmail())) {
       throw new IllegalArgumentException("Cet e-mail est déjà utilisé.");

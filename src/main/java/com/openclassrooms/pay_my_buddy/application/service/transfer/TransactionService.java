@@ -24,12 +24,23 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
 
+    /**
+     * Exécute un virement entre deux comptes.
+     * - Valide le montant, la devise et l’état des comptes
+     * - Calcule les frais (0,5 %) et met à jour les soldes
+     * - Persiste la transaction puis retourne le résultat agrégé
+     *
+     * @param dto requête de virement (obligatoire: senderAccountId, receiverAccountId, amount; optionnels: currency, description)
+     * @return résultat du virement (id, statut, montants/frais, devise, soldes avant/après, etc.)
+     * @throws IllegalArgumentException si les validations échouent (identifiants invalides, comptes inactifs, montant non positif, solde insuffisant, ...)
+     * @throws RuntimeException si un compte n’existe pas
+     */
     @Transactional
     public TransferResult transferMoney(TransactionRequest dto) {
         final Integer senderAccountId = dto.getSenderAccountId();
         final Integer receiverAccountId = dto.getReceiverAccountId();
 
-        /* Vérifier les identifiants des comptes avant une transaction. */
+        /* Vérifie les identifiants des comptes avant une transaction. */
         if (senderAccountId == null || receiverAccountId == null) {
             throw new IllegalArgumentException(
                 "L'identifiant du compte d'émetteur et receveur n'est pas valide.");
@@ -44,13 +55,13 @@ public class TransactionService {
         final Account receiverAccount = accountRepository.findByIdForUpdate(receiverAccountId)
             .orElseThrow(() -> new RuntimeException("Invalid receiver account"));
 
-        /* Vérifier les status des comptes sont actifs. */
+        /* Vérifie les status des comptes sont actifs. */
         if (senderAccount.getAccountStatus() != AccountStatus.ACTIVE
             || receiverAccount.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new IllegalArgumentException("Le compte n'est pas actif.");
         }
 
-        /* Vérifier le montant et la monnaie du virement sont saisis correctement avant une transaction. */
+        /* Vérifie le montant et la monnaie du virement sont saisis correctement avant une transaction. */
         BigDecimal amount = dto.getAmount();
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Le montant doit être positif.");
@@ -66,7 +77,7 @@ public class TransactionService {
         final BigDecimal fee = calculateFee(amount);
         final BigDecimal totalDebit = amount.add(fee);
 
-        /* Vérifier le montant du virement saisi est disponible sur le compte d'émetteur avant une transaction. */
+        /* Vérifie le montant du virement saisi est disponible sur le compte d'émetteur avant une transaction. */
         final BigDecimal before = senderAccount.getBalance();
         if (before.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Le solde du compte émetteur est négatif.");
@@ -114,7 +125,11 @@ public class TransactionService {
             .build();
     }
 
-    /* Lire une liste de transaction par un identifiant de compte */
+    /**
+     * Récupère les 20 dernières transactions émises par le compte donné.
+     * @param accountId identifiant du compte émetteur
+     * @return liste des transactions récentes
+     */
     public List<TransactionResponse> getRecentTransactionsForAccount(Integer accountId) {
         return transactionRepository
             .findTop20BySenderAccount_AccountIdOrderByTransactionTimeDesc(accountId)
@@ -123,7 +138,7 @@ public class TransactionService {
             .toList();
     }
 
-    /* Calculer un frais de virement. (0.05% du montant) */
+    /** Calcule les frais: 0,5 % du montant, arrondi HALF_UP à 2 décimales. */
     private BigDecimal calculateFee(BigDecimal amount) {
         BigDecimal RATE = new BigDecimal("0.005");
         return amount.multiply(RATE).setScale(2, RoundingMode.HALF_UP);

@@ -22,6 +22,13 @@ public class RelationService {
     private final UserRelationRepository relationRepository;
     private final AccountRepository accountRepository;
 
+    /**
+     * Ajoute une relation de bénéficiaire.
+     *
+     * @param currentUserEmail email de l’utilisateur courant
+     * @param targetEmail email de l’utilisateur à ajouter
+     * @throws IllegalArgumentException si l’utilisateur n’existe pas, auto‑ajout ou autre validation échoue
+     */
     @Transactional
     public void addBeneficiary(String currentUserEmail, String targetEmail) {
         User me = userRepository.findByEmail(currentUserEmail)
@@ -42,6 +49,14 @@ public class RelationService {
         relationRepository.save(rel);
     }
 
+    /**
+     * Récupère les options de bénéficiaires pour un compte émetteur donné.
+     * - Sélectionne, pour chaque relation, un compte interne receveur disponible
+     *
+     * @param accountId identifiant du compte émetteur
+     * @return liste d’options (receiverAccountId, email)
+     * @throws IllegalArgumentException si le compte n’existe pas
+     */
     @Transactional
     public List<RelationOptionDTO> getRelationOptions(Integer accountId) {
         Account account = accountRepository.findById(accountId)

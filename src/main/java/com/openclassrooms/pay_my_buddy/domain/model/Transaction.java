@@ -29,6 +29,10 @@ import org.hibernate.annotations.CreationTimestamp;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+/**
+ * Entité Transaction couvrant virements internes et opérations externes.
+ * Inclut montants, frais, devise, type/statut et horodatage.
+ */
 public class Transaction {
 
   @Id

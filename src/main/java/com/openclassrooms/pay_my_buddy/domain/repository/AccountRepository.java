@@ -16,13 +16,29 @@ import org.springframework.stereotype.Repository;
 public interface AccountRepository extends JpaRepository<Account, Integer> {
   List<Account> findByUserId(Integer userId);
 
+  /**
+   * Récupère un compte par son identifiant sans verrouillage.
+   * @param accountId identifiant du compte
+   * @return compte si trouvé
+   */
   @Query("SELECT a FROM Account a WHERE a.accountId = :accountId")
   Optional<Account> findByIdPlain(@Param("accountId") Integer accountId);
 
+  /**
+   * Récupère un compte par son identifiant en appliquant un verrou pessimiste d’écriture.
+   * À utiliser dans un contexte transactionnel lors de mises à jour de solde.
+   * @param accountId identifiant du compte
+   * @return compte verrouillé si trouvé
+   */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT a FROM Account a WHERE a.accountId = :accountId")
   Optional<Account> findByIdForUpdate(@Param("accountId") Integer accountId);
 
+  /**
+   * Récupère le solde d’un compte.
+   * @param accountId identifiant du compte
+   * @return solde courant
+   */
   @Query("SELECT a.balance FROM Account a WHERE a.accountId = :accountId")
   BigDecimal getBalanceByAccountId(@Param("accountId") Integer accountId);
 
@@ -31,6 +47,11 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
   Optional<Account> findTopByUserIdOrderByAccountIdAsc(Integer userId);
   Optional<Account> findByUserIdAndAccountType(Integer userId, AccountType accountType);
 
+  /**
+   * Liste les comptes actifs d’un utilisateur.
+   * @param userId identifiant utilisateur
+   * @return comptes actifs
+   */
   @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND a.accountStatus = 'ACTIVE'")
   List<Account> findActiveByUserId(@Param("userId") Integer userId);
 }

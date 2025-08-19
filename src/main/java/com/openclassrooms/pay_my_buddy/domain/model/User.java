@@ -15,6 +15,10 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+/**
+ * Entité utilisateur de l’application.
+ * Représente un profil avec comptes internes/externes et relations sociales.
+ */
 public class User {
 
   @Id

@@ -29,6 +29,10 @@ import org.hibernate.annotations.CreationTimestamp;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+/**
+ * Compte interne d’un utilisateur (ex: CHECKING).
+ * Porte le solde, le type, le statut et les liens de transactions.
+ */
 public class Account {
 
   @Id
