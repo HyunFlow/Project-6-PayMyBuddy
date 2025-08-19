@@ -1,20 +1,14 @@
-HELP.md
+# --- Build outputs ---
 target/
-.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+build/
+out/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -25,9 +19,30 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Logs & dumps ---
+logs/
+*.log
+*.tmp
+hs_err_pid*.log
+replay_pid*.log
+
+# --- Secrets / Environment files ---
+.env
+.env.*
+!.env.example
+
+# --- Spring config (real ones ignored, examples allowed) ---
+# ignore env-specific real configs
+src/main/resources/application-*.yml
+src/main/resources/application-*.properties
+# allow example templates
+!src/main/resources/application-example.yml
+!src/main/resources/application-example.properties.env
