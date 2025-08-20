@@ -36,6 +36,8 @@ replay_pid*.log
 
 # --- Secrets / Environment files ---
 .env
+*.env
+**/*.env
 .env.*
 !.env.example
 
