@@ -22,58 +22,72 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final AuthenticationConfiguration authenticationConfiguration;
-  private final JwtUtil jwtUtil;
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtUtil jwtUtil;
 
-  @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-    return configuration.getAuthenticationManager();
-  }
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+        throws Exception {
+        return configuration.getAuthenticationManager();
+    }
 
-  @Bean
-  public BCryptPasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http, Validator validator) throws Exception {
-    http
-        .csrf((auth) -> auth.disable())
-        .formLogin((auth) -> auth.disable())
-        .httpBasic((auth) -> auth.disable()
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, Validator validator)
+        throws Exception {
+        http
+            .csrf((auth) -> auth.disable())
+            .formLogin((auth) -> auth.disable())
+            .httpBasic((auth) -> auth.disable()
+            );
+
+        http
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.sameOrigin())
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("frame-ancestors 'self'"))
+            );
+
+        http
+            .authorizeHttpRequests((auth) -> auth
+                .requestMatchers("/h2-console/**", "/", "/login", "/signup", "/css/**", "/js/**", "/images/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                .requestMatchers("/admin").hasAuthority("ADMIN")
+                .requestMatchers("/relations/new", "/relations", "/transfer",
+                    "/accounts/*/transfer", "/profile").hasAnyAuthority("ADMIN", "USER")
+                .anyRequest().authenticated()
+            );
+
+        http
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .deleteCookies("accessToken", "refreshToken")
+                .logoutSuccessUrl("/login")
+                .permitAll()
+            );
+
+        http.exceptionHandling(exception -> exception
+            .authenticationEntryPoint((request, response, authException) -> {
+                response.sendRedirect("/login");
+            })
+            .accessDeniedHandler((request, response, accessDeniedException) -> {
+                request.getRequestDispatcher("/error/403").forward(request, response);
+            })
         );
 
-    http
-        .logout(logout -> logout
-            .logoutUrl("/logout")
-            .deleteCookies("accessToken", "refreshToken")
-            .logoutSuccessUrl("/login")
-            .permitAll()
-        );
+        http
+            .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(
+                new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil,
+                    validator), UsernamePasswordAuthenticationFilter.class)
+            .sessionManagement((session) -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-    http.exceptionHandling(exception -> exception
-        .authenticationEntryPoint((request, response, authException) -> {
-          response.sendRedirect("/login");
-        })
-        .accessDeniedHandler((request, response, accessDeniedException) -> {
-          request.getRequestDispatcher("/error/403").forward(request, response);
-        })
-    );
-
-    http
-        .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, validator), UsernamePasswordAuthenticationFilter.class)
-        .authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/","/login","/signup", "/css/**", "/js/**", "/images/**").permitAll()
-            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-            .requestMatchers("/admin").hasAuthority("ADMIN")
-            .requestMatchers("/relations/new", "/relations", "/transfer", "/accounts/*/transfer", "/profile").hasAnyAuthority("ADMIN", "USER")
-            .anyRequest().authenticated()
-        );
-
-    http
-        .sessionManagement((session) -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-    return http.build();
-  }
+        return http.build();
+    }
 }

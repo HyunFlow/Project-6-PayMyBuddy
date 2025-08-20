@@ -37,7 +37,7 @@ public class AuthController {
   @GetMapping("/signup")
   public String signupPage(Model model,
       @RequestParam(value = "error", required = false) String error) {
-    model.addAttribute("signupDTO", new SignupRequest());
+    model.addAttribute("signupRequest", new SignupRequest());
     if (error != null) {
       model.addAttribute("errorMessage",
           "L'adresse e-mail que vous avez saisie est déjà utilisée.");
